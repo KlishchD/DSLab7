@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Groups>
+    <Group id="0" name="Group A" year="2">
+        <Student age="17" id="0" name="Student 0"/>
+        <Student age="18" id="1" name="Student 1"/>
+        <Student age="19" id="2" name="Student 2"/>
+        <Student age="18" id="3" name="Student 3"/>
+    </Group>
+    <Group id="2" name="Group A" year="2">
+        <Student age="18" id="6" name="Student A"/>
+    </Group>
+</Groups>

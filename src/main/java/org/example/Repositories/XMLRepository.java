@@ -1,7 +1,7 @@
 package org.example.Repositories;
 
-import org.example.Models.Album;
-import org.example.Models.Artist;
+import org.example.Models.Student;
+import org.example.Models.Group;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class XMLRepository implements Repository {
-    private final List<Artist> artists = new ArrayList<>();
-    private final List<Album> albums = new ArrayList<>();
+    private final List<Group> groups = new ArrayList<>();
+    private final List<Student> students = new ArrayList<>();
 
-    private int maxArtistId = 0;
-    private int maxAlbumId = 0;
+    private int maxGroupsId = 0;
+    private int maxStudentsId = 0;
 
     public XMLRepository(String path) {
         DocumentBuilder builder;
@@ -30,15 +30,15 @@ public class XMLRepository implements Repository {
             Document doc = builder.parse(new File(path));
             doc.getDocumentElement().normalize();
 
-            NodeList elements = doc.getElementsByTagName(Artist.ARTIST);
+            NodeList elements = doc.getElementsByTagName(Group.GROUP);
             for (int i = 0; i < elements.getLength(); ++i) {
                 Element element = (Element) elements.item(i);
 
-                Artist artist = new Artist();
-                parseArtist(element, artist);
+                Group group = new Group();
+                parseGroup(element, group);
 
-                maxArtistId = Math.max(maxArtistId, artist.getId());
-                artists.add(artist);
+                maxGroupsId = Math.max(maxGroupsId, group.getId());
+                groups.add(group);
             }
         } catch (ParserConfigurationException | IOException | SAXException e) {
             throw new RuntimeException(e);
@@ -46,67 +46,68 @@ public class XMLRepository implements Repository {
     }
 
     @Override
-    public int countArtists() {
-        return artists.size();
+    public int countGroups() {
+        return groups.size();
     }
 
     @Override
-    public int countAlbums() {
-        return albums.size();
+    public int countStudents() {
+        return students.size();
     }
 
     @Override
-    public void insertArtist(Artist value) {
-        maxArtistId++;
-        value.setId(maxArtistId);
-        artists.add(value);
+    public void insertGroup(Group value) {
+        maxGroupsId++;
+        value.setId(maxGroupsId);
+        groups.add(value);
 
-        for (Album album: value.getAlbums()) {
-            maxAlbumId++;
-            album.setId(maxAlbumId);
-            albums.add(album);
+        for (Student student : value.getStudents()) {
+            maxStudentsId++;
+            student.setId(maxStudentsId);
+            students.add(student);
         }
     }
 
     @Override
-    public void insertAlbum(int artistId, Album album) {
-        Artist artist = getArtist(artistId);
+    public void insertStudent(int groupId, Student student) {
+        Group group = getGroup(groupId);
 
-        maxAlbumId++;
-        album.setId(maxAlbumId);
+        if (group != null) {
+            maxStudentsId++;
+            student.setId(maxStudentsId);
 
-        if (artist != null) {
-            artist.addAlbum(album);
-            albums.add(album);
+            group.addStudent(student);
+            students.add(student);
         }
     }
 
     @Override
-    public void deleteArtist(int id) {
-        for (int i = 0; i < artists.size(); ++i) {
-            if (artists.get(i).getId() == id) {
-                albums.removeAll(artists.get(i).getAlbums());
-                artists.remove(i);
+    public void deleteGroup(int id) {
+        for (int i = 0; i < groups.size(); ++i) {
+            if (groups.get(i).getId() == id) {
+                students.removeAll(groups.get(i).getStudents());
+                groups.remove(i);
                 return;
             }
         }
     }
 
     @Override
-    public void deleteAlbum(int id) {
-        Album album = getAlbum(id);
-        if (album != null) {
-            for (Artist artist : artists) {
-                if (artist.hasAlbum(album)) {
-                    artist.removeAlbum(album);
+    public void deleteStudent(int id) {
+        Student student = getStudent(id);
+        if (student != null) {
+            for (Group group : groups) {
+                if (group.hasStudent(student)) {
+                    group.removeStudent(student);
+                    return;
                 }
             }
         }
     }
 
     @Override
-    public Artist getArtist(int id) {
-        for (Artist item : artists) {
+    public Group getGroup(int id) {
+        for (Group item : groups) {
             if (item.getId() == id) {
                 return item;
             }
@@ -116,8 +117,8 @@ public class XMLRepository implements Repository {
     }
 
     @Override
-    public Album getAlbum(int id) {
-        for (Album item : albums) {
+    public Student getStudent(int id) {
+        for (Student item : students) {
             if (item.getId() == id) {
                 return item;
             }
@@ -127,13 +128,13 @@ public class XMLRepository implements Repository {
     }
 
     @Override
-    public List<Artist> getArtist() {
-        return artists;
+    public List<Group> getGroup() {
+        return groups;
     }
 
     @Override
-    public List<Album> getAlbums() {
-        return albums;
+    public List<Student> getStudents() {
+        return students;
     }
 
     public void save(String file) throws ParserConfigurationException, TransformerException {
@@ -147,49 +148,49 @@ public class XMLRepository implements Repository {
         transformer.transform(source, result);
     }
 
-    private void parseArtist(Element element, Artist item) {
-        item.setId(Integer.parseInt(element.getAttribute(Artist.ID)));
-        item.setName(element.getAttribute(Artist.NAME));
-        item.setAge(Integer.parseInt(element.getAttribute(Artist.AGE)));
+    private void parseGroup(Element element, Group group) {
+        group.setId(Integer.parseInt(element.getAttribute(Group.ID)));
+        group.setName(element.getAttribute(Group.NAME));
+        group.setYear(Integer.parseInt(element.getAttribute(Group.YEAR)));
 
-        NodeList children = element.getElementsByTagName(Album.ALBUM);
+        NodeList children = element.getElementsByTagName(Student.STUDENT);
         for (int i = 0; i < children.getLength(); ++i) {
             Element child = (Element) children.item(i);
 
-            Album album = new Album();
-            album.setId(Integer.parseInt(child.getAttribute(Album.ID)));
-            album.setName(child.getAttribute(Album.NAME));
-            item.addAlbum(album);
+            Student student = new Student();
+            student.setId(Integer.parseInt(child.getAttribute(Student.ID)));
+            student.setName(child.getAttribute(Student.NAME));
+            student.setAge(Integer.parseInt(child.getAttribute(Student.AGE)));
+            group.addStudent(student);
 
-            maxAlbumId = Math.max(maxAlbumId, album.getId());
-            albums.add(album);
+            maxStudentsId = Math.max(maxStudentsId, student.getId());
+            students.add(student);
         }
     }
 
     private Document createDocumentWithItems() throws ParserConfigurationException {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
-        Element artists = doc.createElement(Artist.ARTISTS);
-        for (Artist item: this.artists) {
-            Element artist = doc.createElement(Artist.ARTIST);
+        Element groups = doc.createElement(Group.GROUPS);
+        for (Group item: this.groups) {
+            Element group = doc.createElement(Group.GROUP);
 
-            artist.setAttribute(Artist.ID, String.valueOf(item.getId()));
-            artist.setAttribute(Artist.NAME, item.getName());
-            artist.setAttribute(Artist.AGE, String.valueOf(item.getAge()));
+            group.setAttribute(Group.ID, String.valueOf(item.getId()));
+            group.setAttribute(Group.NAME, item.getName());
+            group.setAttribute(Group.YEAR, String.valueOf(item.getYear()));
 
-            Element albums = doc.createElement(Artist.ALBUMS);
-            for (Album subitem: item.getAlbums()) {
-                Element album = doc.createElement(Album.ALBUM);
-                album.setAttribute(Album.ID, String.valueOf(subitem.getId()));
-                album.setAttribute(Album.NAME, subitem.getName());
-                albums.appendChild(album);
+            for (Student subitem: item.getStudents()) {
+                Element student = doc.createElement(Student.STUDENT);
+                student.setAttribute(Student.ID, String.valueOf(subitem.getId()));
+                student.setAttribute(Student.NAME, subitem.getName());
+                student.setAttribute(Student.AGE, String.valueOf(subitem.getAge()));
+                group.appendChild(student);
             }
-            artist.appendChild(albums);
 
-            artists.appendChild(artist);
+            groups.appendChild(group);
         }
 
-        doc.appendChild(artists);
+        doc.appendChild(groups);
 
         return doc;
     }

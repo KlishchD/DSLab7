@@ -1,7 +1,7 @@
 package org.example.Repositories;
 
-import org.example.Models.Album;
-import org.example.Models.Artist;
+import org.example.Models.Student;
+import org.example.Models.Group;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,18 +16,18 @@ public class DBRepository implements Repository {
 
         Statement statement = connection.createStatement();
 
-        String artistsTable = "CREATE TABLE IF NOT EXISTS artists (id SERIAL PRIMARY KEY, name varchar(30), age int)";
-        String albumsTable = "CREATE TABLE IF NOT EXISTS albums (id SERIAL PRIMARY KEY, artist_id int, name varchar(30), CONSTRAINT fk_artist FOREIGN KEY(artist_id) REFERENCES artists(id))";
+        String groupsTable = "CREATE TABLE IF NOT EXISTS groups (id SERIAL PRIMARY KEY, name varchar(30), year int)";
+        String studentsTable = "CREATE TABLE IF NOT EXISTS students (id SERIAL PRIMARY KEY, group_id int, name varchar(30), age int, CONSTRAINT fk_group FOREIGN KEY(group_id) REFERENCES groups(id))";
 
-        statement.execute(artistsTable);
-        statement.execute(albumsTable);
+        statement.execute(groupsTable);
+        statement.execute(studentsTable);
     }
 
     @Override
-    public int countArtists() {
+    public int countGroups() {
         try {
             Statement statement = connection.createStatement();
-            String query = "SELECT COUNT(*) as count FROM artists";
+            String query = "SELECT COUNT(*) as count FROM groups";
 
             ResultSet resultSet = statement.executeQuery(query);
             if (resultSet.next()) {
@@ -40,10 +40,10 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public int countAlbums() {
+    public int countStudents() {
         try {
             Statement statement = connection.createStatement();
-            String query = "SELECT COUNT(*) as count FROM albums";
+            String query = "SELECT COUNT(*) as count FROM students";
 
             ResultSet resultSet = statement.executeQuery(query);
             if (resultSet.next()) {
@@ -56,82 +56,83 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public void insertArtist(Artist artist) {
+    public void insertGroup(Group group) {
         try {
             Statement statement = connection.createStatement();
-            String artistQuery = "INSERT INTO artists(name, age) VALUES('" + artist.getName() + "'," + artist.getAge() + ")";
-            statement.execute(artistQuery);
+            String groupQuery = "INSERT INTO groups(name, year) VALUES('" + group.getName() + "'," + group.getYear() + ")";
+            statement.execute(groupQuery);
 
-            String findQuery = "SELECT * FROM artists WHERE name='" + artist.getName() + "' AND age=" + artist.getAge();
+            String findQuery = "SELECT * FROM groups WHERE name='" + group.getName() + "' AND year=" + group.getYear();
             ResultSet resultSet = statement.executeQuery(findQuery);
             if (resultSet.next()) {
                 int id = resultSet.getInt("id");
-                for (Album album : artist.getAlbums()) {
-                    String albumsQuery = "INSERT INTO albums(artist_id, name) VALUES(" + id + ",'" + album.getName() + "')";
-                    statement.execute(albumsQuery);
+                for (Student student : group.getStudents()) {
+                    String studentQuery = "INSERT INTO students(group_id, name, age) VALUES(" + id + ",'" + student.getName() + "'," + student.getAge() + ")";
+                    statement.execute(studentQuery);
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Cannot add artist as it already exists");
+            System.out.println("Cannot add group as it already exists");
         }
     }
 
     @Override
-    public void insertAlbum(int artistId, Album album) {
+    public void insertStudent(int groupId, Student student) {
         try {
             Statement statement = connection.createStatement();
-            String albumsQuery = "INSERT INTO albums(artist_id, name) VALUES(" + artistId + ",'" + album.getName() + "')";
-            statement.execute(albumsQuery);
+            String studentsQuery = "INSERT INTO students(group_id, name, age) VALUES(" + groupId + ",'" + student.getName() + "'," + student.getAge() + ")";
+            statement.execute(studentsQuery);
         } catch (SQLException e) {
-            System.out.println("Cannot add album as it already exists");
+            System.out.println("Cannot add student as it already exists");
         }
     }
 
     @Override
-    public void deleteArtist(int id) {
+    public void deleteGroup(int id) {
         try {
             Statement statement = connection.createStatement();
-            String albumsQuery = "DELETE FROM albums WHERE artist_id = " + id;
-            statement.execute(albumsQuery);
-            String artistQuery = "DELETE FROM artists WHERE id = " + id;
-            statement.execute(artistQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void deleteAlbum(int id) {
-        try {
-            Statement statement = connection.createStatement();
-            String albumsQuery = "DELETE FROM albums WHERE id = " + id;
-            statement.execute(albumsQuery);
+            String studentsQuery = "DELETE FROM students WHERE group_id = " + id;
+            statement.execute(studentsQuery);
+            String groupQuery = "DELETE FROM groups WHERE id = " + id;
+            statement.execute(groupQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Artist getArtist(int id) {
+    public void deleteStudent(int id) {
         try {
             Statement statement = connection.createStatement();
-            String query = "SELECT * FROM (SELECT * FROM artists WHERE id = " + id + ") JOIN (SELECT id as album_id, artist_id as id, name as album_name FROM albums) USING (id)";
+            String studentQuery = "DELETE FROM students WHERE id = " + id;
+            statement.execute(studentQuery);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Group getGroup(int id) {
+        try {
+            Statement statement = connection.createStatement();
+            String query = "SELECT * FROM (SELECT * FROM groups WHERE id = " + id + ") JOIN (SELECT id as student_id, group_id as id, name as student_name, age as student_age FROM students) USING (id)";
 
             ResultSet resultSet = statement.executeQuery(query);
             if (resultSet.next()) {
-                Artist artist = new Artist();
-                artist.setId(resultSet.getInt("id"));
-                artist.setName(resultSet.getString("name"));
-                artist.setAge(resultSet.getInt("age"));
+                Group group = new Group();
+                group.setId(resultSet.getInt("id"));
+                group.setName(resultSet.getString("name"));
+                group.setYear(resultSet.getInt("year"));
 
                do {
-                    Album album = new Album();
-                    album.setId(resultSet.getInt("album_id"));
-                    album.setName(resultSet.getString("album_name"));
-                    artist.addAlbum(album);
+                    Student student = new Student();
+                    student.setId(resultSet.getInt("student_id"));
+                    student.setName(resultSet.getString("student_name"));
+                    student.setAge(resultSet.getInt("student_age"));
+                    group.addStudent(student);
                } while (resultSet.next());
 
-               return artist;
+               return group;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -140,17 +141,18 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public Album getAlbum(int id) {
+    public Student getStudent(int id) {
         try {
             Statement statement = connection.createStatement();
-            String query = "SELECT * FROM albums WHERE id=" + id;
+            String query = "SELECT * FROM students WHERE id=" + id;
 
             ResultSet resultSet = statement.executeQuery(query);
             if (resultSet.next()) {
-                Album album = new Album();
-                album.setId(resultSet.getInt("id"));
-                album.setName(resultSet.getString("name"));
-                return album;
+                Student student = new Student();
+                student.setId(resultSet.getInt("id"));
+                student.setName(resultSet.getString("name"));
+                student.setAge(resultSet.getInt("age"));
+                return student;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -159,64 +161,66 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public List<Artist> getArtist() {
+    public List<Group> getGroup() {
         try {
             Statement statement = connection.createStatement();
-            String query = "SELECT * FROM (SELECT * FROM artists) LEFT JOIN (SELECT id as album_id, artist_id as id, name as album_name FROM albums) USING (id)";
+            String query = "SELECT * FROM (SELECT * FROM groups) LEFT JOIN (SELECT id as student_id, group_id as id, name as student_name, age as student_age FROM students) USING (id)";
 
-            List<Artist> artists = new ArrayList<>();
+            List<Group> groups = new ArrayList<>();
 
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
-                Artist artist = null;
+                Group group = null;
 
                 do {
-                    if (artist == null || resultSet.getInt("id") != artist.getId()) {
-                        if (artist != null) {
-                            artists.add(artist);
+                    if (group == null || resultSet.getInt("id") != group.getId()) {
+                        if (group != null) {
+                            groups.add(group);
                         }
 
-                        artist = new Artist();
-                        artist.setId(resultSet.getInt("id"));
-                        artist.setName(resultSet.getString("name"));
-                        artist.setAge(resultSet.getInt("age"));
+                        group = new Group();
+                        group.setId(resultSet.getInt("id"));
+                        group.setName(resultSet.getString("name"));
+                        group.setYear(resultSet.getInt("year"));
                     }
 
-                    Album album = new Album();
-                    album.setId(resultSet.getInt("album_id"));
+                    Student student = new Student();
+                    student.setId(resultSet.getInt("student_id"));
                     if (resultSet.wasNull()) {
                         continue;
                     }
-                    album.setName(resultSet.getString("album_name"));
-                    artist.addAlbum(album);
+                    student.setName(resultSet.getString("student_name"));
+                    student.setAge(resultSet.getInt("student_age"));
+                    group.addStudent(student);
                 } while (resultSet.next());
 
-                artists.add(artist);
+                groups.add(group);
             }
 
-            return artists;
+            return groups;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<Album> getAlbums() {
+    public List<Student> getStudents() {
         try {
             Statement statement = connection.createStatement();
-            String query = "SELECT * FROM albums";
+            String query = "SELECT * FROM students";
 
-            List<Album> albums = new ArrayList<>();
+            List<Student> students = new ArrayList<>();
 
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
-                Album album = new Album();
-                album.setId(resultSet.getInt("album_id"));
-                album.setName(resultSet.getString("album_name"));
-                albums.add(album);
+                Student student = new Student();
+                student.setId(resultSet.getInt("id"));
+                student.setName(resultSet.getString("name"));
+                student.setAge(resultSet.getInt("age"));
+                students.add(student);
             }
 
-            return albums;
+            return students;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

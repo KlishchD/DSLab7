@@ -3,22 +3,22 @@ package org.example.Models;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.Objects;
-
 @Getter @Setter
-public class Album {
+public class Student {
     public static final String ID = "id";
     public static final String NAME = "name";
-    public static final String ALBUM = "Album";
+    public static final String AGE = "age";
+    public static final String STUDENT = "Student";
 
     private int id;
+    private int age;
     private String name;
 
     @Override
     public String toString() {
-        return "Album{" +
+        return "Student{" +
                 "id=" + id +
+                ", age=" + age +
                 ", name='" + name + '\'' +
                 '}';
     }

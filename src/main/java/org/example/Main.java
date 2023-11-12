@@ -1,7 +1,7 @@
 package org.example;
 
-import org.example.Models.Album;
-import org.example.Models.Artist;
+import org.example.Models.Student;
+import org.example.Models.Group;
 import org.example.Repositories.DBRepository;
 import org.example.Repositories.Repository;
 import org.example.Repositories.XMLRepository;
@@ -12,47 +12,48 @@ import java.sql.SQLException;
 
 public class Main {
     public static void main(String[] args) throws ParserConfigurationException, TransformerException, SQLException, ClassNotFoundException {
-        //Repository repository = new XMLRepository("src/main/resources/music.xml");
-        Repository repository = new DBRepository("jdbc:postgresql://localhost:5432/dev", "postgres", "postgres");
+        XMLRepository repository = new XMLRepository("src/main/resources/groups.xml");
+        //Repository repository = new DBRepository("jdbc:postgresql://localhost:5432/dev", "postgres", "postgres");
 
-        System.out.println("Artists count is " + repository.countArtists());
-        System.out.println("Albums count is " + repository.countAlbums());
-        System.out.println("Artists: " + repository.getArtist());
-
-        System.out.println();
-
-        Artist artist0 = repository.getArtist(0);
-        System.out.println(artist0);
-
-        Artist artist1 = repository.getArtist(1);
-        System.out.println(artist1);
+        System.out.println("Groups count is " + repository.countGroups());
+        System.out.println("Students count is " + repository.countStudents());
+        System.out.println("Groups: " + repository.getGroup());
 
         System.out.println();
 
-        repository.deleteArtist(1);
-        System.out.println("Artists count is " + repository.countArtists());
-        System.out.println("Albums count is " + repository.countAlbums());
-        System.out.println("Artists: " + repository.getArtist());
+        Group group0 = repository.getGroup(0);
+        System.out.println(group0);
 
-        System.out.println("Album: " + repository.getAlbum(1));
+        Group group1 = repository.getGroup(1);
+        System.out.println(group1);
 
-        System.out.println("Artists count is " + repository.countArtists());
-        System.out.println("Albums count is " + repository.countAlbums());
-        System.out.println("Artists: " + repository.getArtist());
+        System.out.println();
 
-        System.out.println("Album: " + repository.getAlbum(10));
+        repository.deleteGroup(1);
+        System.out.println("Groups count is " + repository.countGroups());
+        System.out.println("Students count is " + repository.countStudents());
+        System.out.println("Groups: " + repository.getGroup());
 
-        Artist artist = new Artist();
-        artist.setId(3);
-        artist.setName("New one");
-        artist.setAge(17);
-        Album album = new Album();
-        album.setName("The end!");
-        artist.addAlbum(album);
-        repository.insertArtist(artist);
+        System.out.println("Student: " + repository.getStudent(1));
 
-        //repository.deleteAlbum(3);
+        System.out.println("Groups count is " + repository.countGroups());
+        System.out.println("Students count is " + repository.countStudents());
+        System.out.println("Groups: " + repository.getGroup());
 
-        //repository.save("src/main/resources/music1.xml");
+        System.out.println("Student: " + repository.getStudent(10));
+
+        Group group = new Group();
+        group.setId(3);
+        group.setName("Group A");
+        group.setYear(2);
+        Student student = new Student();
+        student.setName("Student A");
+        student.setAge(18);
+        group.addStudent(student);
+        repository.insertGroup(group);
+
+        //repository.deleteStudent(3);
+
+        repository.save("src/main/resources/group1.xml");
     }
 }

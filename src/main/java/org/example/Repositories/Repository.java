@@ -1,23 +1,23 @@
 package org.example.Repositories;
 
-import org.example.Models.Album;
-import org.example.Models.Artist;
+import org.example.Models.Student;
+import org.example.Models.Group;
 
 import java.util.List;
 
 public interface Repository {
-    int countArtists();
-    int countAlbums();
+    int countGroups();
+    int countStudents();
 
-    void insertArtist(Artist artist);
-    void insertAlbum(int artistId, Album album);
+    void insertGroup(Group group);
+    void insertStudent(int groupId, Student student);
 
-    void deleteArtist(int id);
-    void deleteAlbum(int id);
+    void deleteGroup(int id);
+    void deleteStudent(int id);
 
-    Artist getArtist(int id);
-    Album getAlbum(int id);
+    Group getGroup(int id);
+    Student getStudent(int id);
 
-    List<Artist> getArtist();
-    List<Album> getAlbums();
+    List<Group> getGroup();
+    List<Student> getStudents();
 }
