@@ -24,7 +24,7 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public int count() {
+    public int countArtists() {
         try {
             Statement statement = connection.createStatement();
             String query = "SELECT COUNT(*) as count FROM artists";
@@ -40,7 +40,23 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public void insert(Artist artist) {
+    public int countAlbums() {
+        try {
+            Statement statement = connection.createStatement();
+            String query = "SELECT COUNT(*) as count FROM albums";
+
+            ResultSet resultSet = statement.executeQuery(query);
+            if (resultSet.next()) {
+                return resultSet.getInt("count");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    @Override
+    public void insertArtist(Artist artist) {
         try {
             Statement statement = connection.createStatement();
             String artistQuery = "INSERT INTO artists(name, age) VALUES('" + artist.getName() + "'," + artist.getAge() + ")";
@@ -56,12 +72,23 @@ public class DBRepository implements Repository {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println("Cannot add artist as it already exists");
         }
     }
 
     @Override
-    public void delete(int id) {
+    public void insertAlbum(int artistId, Album album) {
+        try {
+            Statement statement = connection.createStatement();
+            String albumsQuery = "INSERT INTO albums(artist_id, name) VALUES(" + artistId + ",'" + album.getName() + "')";
+            statement.execute(albumsQuery);
+        } catch (SQLException e) {
+            System.out.println("Cannot add album as it already exists");
+        }
+    }
+
+    @Override
+    public void deleteArtist(int id) {
         try {
             Statement statement = connection.createStatement();
             String albumsQuery = "DELETE FROM albums WHERE artist_id = " + id;
@@ -74,7 +101,18 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public Artist get(int id) {
+    public void deleteAlbum(int id) {
+        try {
+            Statement statement = connection.createStatement();
+            String albumsQuery = "DELETE FROM albums WHERE id = " + id;
+            statement.execute(albumsQuery);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Artist getArtist(int id) {
         try {
             Statement statement = connection.createStatement();
             String query = "SELECT * FROM (SELECT * FROM artists WHERE id = " + id + ") JOIN (SELECT id as album_id, artist_id as id, name as album_name FROM albums) USING (id)";
@@ -91,9 +129,9 @@ public class DBRepository implements Repository {
                     album.setId(resultSet.getInt("album_id"));
                     album.setName(resultSet.getString("album_name"));
                     artist.addAlbum(album);
-                } while (resultSet.next());
+               } while (resultSet.next());
 
-                return artist;
+               return artist;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -102,7 +140,26 @@ public class DBRepository implements Repository {
     }
 
     @Override
-    public List<Artist> get() {
+    public Album getAlbum(int id) {
+        try {
+            Statement statement = connection.createStatement();
+            String query = "SELECT * FROM albums WHERE id=" + id;
+
+            ResultSet resultSet = statement.executeQuery(query);
+            if (resultSet.next()) {
+                Album album = new Album();
+                album.setId(resultSet.getInt("id"));
+                album.setName(resultSet.getString("name"));
+                return album;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Artist> getArtist() {
         try {
             Statement statement = connection.createStatement();
             String query = "SELECT * FROM (SELECT * FROM artists) LEFT JOIN (SELECT id as album_id, artist_id as id, name as album_name FROM albums) USING (id)";
@@ -135,12 +192,33 @@ public class DBRepository implements Repository {
                 } while (resultSet.next());
 
                 artists.add(artist);
-
-                return artists;
             }
+
+            return artists;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return null;
+    }
+
+    @Override
+    public List<Album> getAlbums() {
+        try {
+            Statement statement = connection.createStatement();
+            String query = "SELECT * FROM albums";
+
+            List<Album> albums = new ArrayList<>();
+
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                Album album = new Album();
+                album.setId(resultSet.getInt("album_id"));
+                album.setName(resultSet.getString("album_name"));
+                albums.add(album);
+            }
+
+            return albums;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

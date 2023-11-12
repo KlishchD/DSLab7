@@ -21,8 +21,16 @@ public class Artist {
     private int age;
     private List<Album> albums = new ArrayList<>();
 
+    public boolean hasAlbum(Album album) {
+        return albums.contains(album);
+    }
+
     public void addAlbum(Album album) {
         albums.add(album);
+    }
+
+    public void removeAlbum(Album album) {
+        albums.remove(album);
     }
 
     public Album getAlbumByIndex(int index) {
@@ -54,4 +62,5 @@ public class Artist {
                 ", albums=" + albums +
                 '}';
     }
+
 }

@@ -17,7 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class XMLRepository implements Repository {
-    private final List<Artist> data = new ArrayList<>();
+    private final List<Artist> artists = new ArrayList<>();
+    private final List<Album> albums = new ArrayList<>();
+
+    private int maxArtistId = 0;
+    private int maxAlbumId = 0;
 
     public XMLRepository(String path) {
         DocumentBuilder builder;
@@ -32,7 +36,9 @@ public class XMLRepository implements Repository {
 
                 Artist artist = new Artist();
                 parseArtist(element, artist);
-                data.add(artist);
+
+                maxArtistId = Math.max(maxArtistId, artist.getId());
+                artists.add(artist);
             }
         } catch (ParserConfigurationException | IOException | SAXException e) {
             throw new RuntimeException(e);
@@ -40,34 +46,67 @@ public class XMLRepository implements Repository {
     }
 
     @Override
-    public int count() {
-        return data.size();
+    public int countArtists() {
+        return artists.size();
     }
 
     @Override
-    public void insert(Artist value) {
-        int maxId = 0;
-        for (Artist item: data) {
-            maxId = Math.max(maxId, item.getId());
+    public int countAlbums() {
+        return albums.size();
+    }
+
+    @Override
+    public void insertArtist(Artist value) {
+        maxArtistId++;
+        value.setId(maxArtistId);
+        artists.add(value);
+
+        for (Album album: value.getAlbums()) {
+            maxAlbumId++;
+            album.setId(maxAlbumId);
+            albums.add(album);
         }
-
-        value.setId(maxId + 1);
-        data.add(value);
     }
 
     @Override
-    public void delete(int id) {
-        for (int i = 0; i < data.size(); ++i) {
-            if (data.get(i).getId() == id) {
-                data.remove(i);
+    public void insertAlbum(int artistId, Album album) {
+        Artist artist = getArtist(artistId);
+
+        maxAlbumId++;
+        album.setId(maxAlbumId);
+
+        if (artist != null) {
+            artist.addAlbum(album);
+            albums.add(album);
+        }
+    }
+
+    @Override
+    public void deleteArtist(int id) {
+        for (int i = 0; i < artists.size(); ++i) {
+            if (artists.get(i).getId() == id) {
+                albums.removeAll(artists.get(i).getAlbums());
+                artists.remove(i);
                 return;
             }
         }
     }
 
     @Override
-    public Artist get(int id) {
-        for (Artist item : data) {
+    public void deleteAlbum(int id) {
+        Album album = getAlbum(id);
+        if (album != null) {
+            for (Artist artist : artists) {
+                if (artist.hasAlbum(album)) {
+                    artist.removeAlbum(album);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Artist getArtist(int id) {
+        for (Artist item : artists) {
             if (item.getId() == id) {
                 return item;
             }
@@ -77,8 +116,24 @@ public class XMLRepository implements Repository {
     }
 
     @Override
-    public List<Artist> get() {
-        return data;
+    public Album getAlbum(int id) {
+        for (Album item : albums) {
+            if (item.getId() == id) {
+                return item;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<Artist> getArtist() {
+        return artists;
+    }
+
+    @Override
+    public List<Album> getAlbums() {
+        return albums;
     }
 
     public void save(String file) throws ParserConfigurationException, TransformerException {
@@ -105,6 +160,9 @@ public class XMLRepository implements Repository {
             album.setId(Integer.parseInt(child.getAttribute(Album.ID)));
             album.setName(child.getAttribute(Album.NAME));
             item.addAlbum(album);
+
+            maxAlbumId = Math.max(maxAlbumId, album.getId());
+            albums.add(album);
         }
     }
 
@@ -112,7 +170,7 @@ public class XMLRepository implements Repository {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
         Element artists = doc.createElement(Artist.ARTISTS);
-        for (Artist item: data) {
+        for (Artist item: this.artists) {
             Element artist = doc.createElement(Artist.ARTIST);
 
             artist.setAttribute(Artist.ID, String.valueOf(item.getId()));
