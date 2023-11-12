@@ -56,6 +56,60 @@ public class XMLRepository implements Repository {
     }
 
     @Override
+    public void updateGroup(Group group) {
+        for (Group item: groups) {
+            if (item.getId() == group.getId()) {
+                for (Student student: item.getStudents()) {
+                    if (!group.hasStudent(student)) {
+                        students.remove(student);
+                    }
+                }
+
+                for (Student student: group.getStudents()) {
+                    if (!item.hasStudent(student)) {
+                        maxStudentsId++;
+                        student.setId(maxStudentsId);
+                        students.add(student);
+                    }
+                }
+
+                item.setName(group.getName());
+                item.setYear(group.getYear());
+                item.setStudents(group.getStudents());
+
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void updateStudent(Student student) {
+        for (Student item: students) {
+            if (item.getId() == student.getId()) {
+                item.setName(student.getName());
+                item.setAge(student.getAge());
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void moveStudentToGroup(int studentId, int groupId) {
+        if (getGroup(groupId) != null) {
+            Student student = getStudent(studentId);
+
+            for (Group item : groups) {
+                if (item.hasStudent(student)) {
+                    item.removeStudent(student);
+                }
+                if (item.getId() == groupId) {
+                    item.addStudent(student);
+                }
+            }
+        }
+    }
+
+    @Override
     public void insertGroup(Group value) {
         maxGroupsId++;
         value.setId(maxGroupsId);
@@ -102,6 +156,7 @@ public class XMLRepository implements Repository {
                     return;
                 }
             }
+            students.remove(student);
         }
     }
 

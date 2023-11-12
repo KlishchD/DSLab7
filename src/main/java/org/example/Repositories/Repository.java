@@ -9,6 +9,11 @@ public interface Repository {
     int countGroups();
     int countStudents();
 
+    void updateGroup(Group group);
+    void updateStudent(Student student);
+
+    void moveStudentToGroup(int studentId, int groupId);
+
     void insertGroup(Group group);
     void insertStudent(int groupId, Student student);
 

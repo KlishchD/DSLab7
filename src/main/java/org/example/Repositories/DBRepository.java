@@ -56,6 +56,55 @@ public class DBRepository implements Repository {
     }
 
     @Override
+    public void updateGroup(Group group) {
+        try {
+            Group item = getGroup(group.getId());
+            if (item != null) {
+                Statement statement = connection.createStatement();
+                String query = "UPDATE groups SET name='" + group.getName() + "', year=" + group.getYear() + " WHERE id=" + group.getId();
+                statement.execute(query);
+
+                for (Student student: item.getStudents()) {
+                    if (!group.hasStudent(student)) {
+                        deleteStudent(student.getId());
+                    }
+                }
+                for (Student student: group.getStudents()) {
+                    if (!item.hasStudent(student)) {
+                        insertStudent(group.getId(), student);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void updateStudent(Student student) {
+        try {
+            Statement statement = connection.createStatement();
+            String query = "UPDATE students SET name='" + student.getName() + "', age=" + student.getAge() + " WHERE id=" + student.getId();
+            statement.execute(query);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void moveStudentToGroup(int studentId, int groupId) {
+        try {
+            if (getGroup(groupId) != null) {
+                Statement statement = connection.createStatement();
+                String query = "UPDATE students SET group_id=" + groupId + " WHERE id=" + studentId;
+                statement.execute(query);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void insertGroup(Group group) {
         try {
             Statement statement = connection.createStatement();
