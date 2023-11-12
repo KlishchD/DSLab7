@@ -72,10 +72,10 @@ public class XMLRepository implements Repository {
     public void insertAlbum(int artistId, Album album) {
         Artist artist = getArtist(artistId);
 
-        maxAlbumId++;
-        album.setId(maxAlbumId);
-
         if (artist != null) {
+            maxAlbumId++;
+            album.setId(maxAlbumId);
+
             artist.addAlbum(album);
             albums.add(album);
         }
