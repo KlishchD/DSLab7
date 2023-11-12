@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Artists>
+    <Artist age="19" id="0" name="Actor A">
+        <Albums>
+            <Album id="0" name="Fire"/>
+            <Album id="1" name="Earth"/>
+            <Album id="2" name="Wind"/>
+            <Album id="3" name="Water"/>
+        </Albums>
+    </Artist>
+</Artists>
