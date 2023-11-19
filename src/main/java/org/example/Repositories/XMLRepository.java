@@ -101,6 +101,7 @@ public class XMLRepository implements Repository {
                     artist.removeAlbum(album);
                 }
             }
+            albums.remove(album);
         }
     }
 
@@ -169,7 +170,6 @@ public class XMLRepository implements Repository {
     private Document createDocumentWithItems() throws ParserConfigurationException {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
-        Element artists = doc.createElement(Artist.ARTISTS);
         for (Artist item: this.artists) {
             Element artist = doc.createElement(Artist.ARTIST);
 
@@ -186,10 +186,8 @@ public class XMLRepository implements Repository {
             }
             artist.appendChild(albums);
 
-            artists.appendChild(artist);
+            doc.appendChild(artist);
         }
-
-        doc.appendChild(artists);
 
         return doc;
     }
