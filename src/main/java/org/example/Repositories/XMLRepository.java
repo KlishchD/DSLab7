@@ -170,6 +170,7 @@ public class XMLRepository implements Repository {
     private Document createDocumentWithItems() throws ParserConfigurationException {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
+        Element artists = doc.createElement(Artist.ARTISTS);
         for (Artist item: this.artists) {
             Element artist = doc.createElement(Artist.ARTIST);
 
@@ -186,8 +187,10 @@ public class XMLRepository implements Repository {
             }
             artist.appendChild(albums);
 
-            doc.appendChild(artist);
+            artists.appendChild(artist);
         }
+
+        doc.appendChild(artists);
 
         return doc;
     }

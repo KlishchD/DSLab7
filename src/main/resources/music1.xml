@@ -8,4 +8,9 @@
             <Album id="3" name="Water"/>
         </Albums>
     </Artist>
+    <Artist age="17" id="2" name="New one">
+        <Albums>
+            <Album id="6" name="The end!"/>
+        </Albums>
+    </Artist>
 </Artists>

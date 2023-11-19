@@ -211,8 +211,8 @@ public class DBRepository implements Repository {
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
                 Album album = new Album();
-                album.setId(resultSet.getInt("album_id"));
-                album.setName(resultSet.getString("album_name"));
+                album.setId(resultSet.getInt("id"));
+                album.setName(resultSet.getString("name"));
                 albums.add(album);
             }
 
